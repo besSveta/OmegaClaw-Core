@@ -58,6 +58,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       ca-certificates \
+      git \
       python3 \
       libopenblas-dev \
       libblas-dev \
@@ -76,6 +77,7 @@ COPY --from=builder /PeTTa /PeTTa
 COPY . /PeTTa/repos/omegaclaw
 
 RUN cp /PeTTa/repos/omegaclaw/run.metta /PeTTa/run.metta \
+ && chown -R 65534:65534 /PeTTa/repos \
  && chown -R 65534:65534 /PeTTa/repos/omegaclaw/memory \
  && find /PeTTa/repos/omegaclaw/memory -type f -exec chmod 0644 {} \; \
  && chmod 0444 /PeTTa/repos/omegaclaw/memory/prompt.txt
