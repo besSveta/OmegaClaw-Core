@@ -23,6 +23,16 @@
     "           ((--> (× tiger elephant) eat) (stv 1.0 0.9))))"
     "Also: note the $1 for independent variables, and for negated knowledge use (stv 0.0 0.9)"
     "Additionally |- also works for revision, to merge evidence even when the term of both premises is the same."))
+    ;RESEARCH:
+    "- Every time when user asks to show current folder respond with result of next function: (shell \"pwd\")"
+    "- Every time when user asks to Test folder creation, it should create folder in current directory: (test-research-folders)"
+    "- When user asks to research, investigate, study, analyze, or build ML model:"
+    "  ALWAYS first call (load-skill \"research-workflow\") then follow the loaded instructions."
+    "- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
+    "- Mark step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
+    "- Pause for user: (research-checkpoint slug_in_quotes message_in_quotes)"
+    "- Finish research and unload workflow: (research-complete slug_in_quotes)"
+    "- Recall plan: (query \"research plan slug\")"
 
 
 (= (read-file $file)
@@ -55,3 +65,90 @@
 (= (metta $str)
    (let $code (sread $str)
         (eval $code)))
+
+
+
+;; ============ WORKFLOW LOADER ============
+
+(= (load-skill $name)
+   (let $path (py-str ("skills/" $name "/SKILL.md"))
+        (let $content (catch (read-file $path))
+             (if (== $content (Error $_ $_))
+                 (send (py-str ("ERROR: skill file not found: " $path)))
+                 (progn (change-state! &active-skill $content)
+                        (remember (py-str ("WORKFLOW [" $name "] loaded")))
+                        (pin (py-str ("ACTIVE_WORKFLOW: " $name
+                                      " STATUS: starting"
+                                      " NEXT: follow workflow instructions")))
+                        (send (py-str ("Loaded workflow: " $name
+                                       ". Instructions active in context until completion.")))
+                        $content)))))
+
+(= (unload-skill)
+   (progn (change-state! &active-skill "")
+          (pin "No active workflow.")
+          (send "Workflow unloaded from context.")
+          "Skill unloaded"))
+
+;=======================Research========================================
+(= (researchDir) "/workspace/research")
+
+
+;; проверка что модуль загружен
+(= (rrresearch)
+   "ssearch")
+
+;; Тест создания папок
+(= (test-research-folders)
+   (shell (py-str ("mkdir -p " (researchDir) "/rrresearch")))
+ )
+
+;; LLM decides to start research
+;; creates folders for research and asks to create 00_problem.md then search online
+(= (research-start $slug $topic)
+   (progn (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/src")))
+          (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/data")))
+          (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/runs")))
+          (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/figures")))
+          (write-file (py-str ((researchDir) "/" $slug "/topic.txt")) $topic)
+          (send (py-str ("Created project: " (researchDir) "/" $slug "\n"
+                         "Folders: src/ data/ runs/ figures/")))
+          (pin (py-str ("RESEARCH_ACTIVE: " $slug
+                        " DIR: " (researchDir) "/" $slug
+                        " TOPIC: " $topic
+                        " STEP: 1-problem"
+                        " ACTION_REQUIRED: Write 00_problem.md then search online"
+                        " for related methods and data sources.")))
+          $slug))
+
+;; update current step
+(= (research-step $slug $step $result $next)
+   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step " — " $result)))
+          (send (py-str ("[" $slug "] " $step ": " $result)))
+          (pin (py-str ("RESEARCH_ACTIVE: " $slug
+                        " DONE: " $step
+                        " RESULT: " $result
+                        " NEXT: " $next)))
+          (py-str ("Done: " $step))))
+
+
+;; Checkpoint: wait user's response
+(= (research-checkpoint $slug $message)
+   (progn (pin (py-str ("RESEARCH_ACTIVE: " $slug
+                        " STATUS: WAITING_FOR_USER"
+                        " DO_NOT_PROCEED"
+                        " RESUME: call (query \"research plan " $slug "\") when user responds")))
+          (send (py-str ("CHECKPOINT [" $slug "]\n" $message "\n"
+                         "Reply to continue.")))
+          (remember (py-str ("RESEARCH [" $slug "] checkpoint: " $message)))
+          "Waiting for user"))
+
+;; Unload research skill
+(= (research-complete $slug)
+   (progn (change-state! &active-skill "")
+          (send (py-str ("Research complete: " $slug
+                         "\nResults in " (researchDir) "/" $slug "/"
+                         "\nWorkflow unloaded from context.")))
+          (remember (py-str ("RESEARCH [" $slug "] COMPLETED")))
+          (pin "No active research. No active workflow.")
+          "Research complete, workflow unloaded"))

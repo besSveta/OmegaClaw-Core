@@ -106,8 +106,10 @@ COPY . /PeTTa/repos/omegaclaw
 RUN cp /PeTTa/repos/omegaclaw/run.metta /PeTTa/run.metta \
  && ln -s /PeTTa/repos/omegaclaw /PeTTa/repos/omegaClaw-Core \
  && mkdir ./chroma_db \
+ && mkdir -p /workspace \
  && chown -R 65534:65534 ./chroma_db \
  && chown -R 65534:65534 /PeTTa/repos/omegaclaw/memory \
+ && chmod 777 /workspace \
  && find /PeTTa/repos/omegaclaw/memory -type f -exec chmod 0644 {} \; \
  && chmod 0444 /PeTTa/repos/omegaclaw/memory/prompt.txt \
  && chown -R 65534:65534 /opt/huggingface /opt/sentence_transformers

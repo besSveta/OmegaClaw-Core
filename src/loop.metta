@@ -7,12 +7,13 @@
 (= (reasoningMode) (empty))
 (= (wakeupInterval) (empty))
 
+
 (= (initLoop)
    (progn (configure maxNewInputLoops 50) ;20
           (configure maxWakeLoops 1)
           (configure sleepInterval 1) ;10
           (configure LLM gpt-5.4)
-          (configure provider Anthropic) ;Anthropic or OpenAI or ASICloud
+          (configure provider OpenAI) ;Anthropic or OpenAI or ASICloud
           (configure maxOutputToken 6000)
           (configure reasoningMode medium)
           (configure wakeupInterval 600) ;600=10 minutes
@@ -20,8 +21,17 @@
           (change-state! &lastresults "")
           (change-state! &loops (maxNewInputLoops))))
 
+(= (getActiveSkillContext)
+   (let $skill (get-state &active_skill)
+        (if (== $skill "")
+            ""
+            (py-str (" ACTIVE_WORKFLOW_INSTRUCTIONS: " $skill
+                     " YOU MUST FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
+                     " AND YOU CALL (unload-skill) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION.")))))
+
 (= (getContext)
    (string-safe (py-str ("PROMPT: " (getPrompt) " SKILLS: " (getSkills)
+                         (getActiveSkillContext)
                          " OUTPUT_FORMAT: Output a ((skillName1 args1) (skillName2 args2) (skillName3 args3) (skillName4 args4) (skillName5 args5)) S-expression of up to 5 sexpr commands, double-check the parentheses it must be (cmd1 ... cmdn)!"
                          " each arg is an explicit string hence needs quotes, and variables are forbidden!"
                          " LAST_SKILL_USE_RESULTS: " (last_chars (get-state &lastresults) (maxFeedback)) " HISTORY: " (getHistory) " TIME: " (get_time_as_string)))))
