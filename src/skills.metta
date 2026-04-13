@@ -8,7 +8,7 @@
     "- Execute shell command without apostrophe in string, it returns the command output to you: (shell string_in_quotes)"
     "- Read file to string: (read-file filename_in_quotes)"
     "- Write string to file: (write-file filename_in_quotes string_in_quotes)"
-    "- Append line to file: (append-file filename_in_quotes string_in_quotes)",
+    "- Append line to file: (append-file filename_in_quotes string_in_quotes)"
     ;COMMUNICATION CHANNELS:
     "- Send message to user: (send string_in_quotes)"
     "- Search the web: (search string_in_quotes)"
@@ -22,7 +22,11 @@
     "(metta (|- ((==> (--> (× $1 elephant) eat) (--> $1 ([] dangerous))) (stv 1.0 0.9))"
     "           ((--> (× tiger elephant) eat) (stv 1.0 0.9))))"
     "Also: note the $1 for independent variables, and for negated knowledge use (stv 0.0 0.9)"
-    "Additionally |- also works for revision, to merge evidence even when the term of both premises is the same."))
+    "Additionally |- also works for revision, to merge evidence even when the term of both premises is the same."
+    ;WORKFLOW:
+    "- Load a workflow skill into active context: (load-skill skillname_in_quotes)"
+    "  Available workflows: research-workflow"
+    "- Unload active workflow from context: (unload-skill)"
     ;RESEARCH:
     "- Every time when user asks to show current folder respond with result of next function: (shell \"pwd\")"
     "- Every time when user asks to Test folder creation, it should create folder in current directory: (test-research-folders)"
@@ -32,7 +36,7 @@
     "- Mark step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
     "- Pause for user: (research-checkpoint slug_in_quotes message_in_quotes)"
     "- Finish research and unload workflow: (research-complete slug_in_quotes)"
-    "- Recall plan: (query \"research plan slug\")"
+    "- Recall plan: (query \"research plan slug\")"))
 
 
 (= (read-file $file)
