@@ -30,11 +30,9 @@
     ;RESEARCH:
     "- Every time when user asks to show current folder respond with result of next function: (shell \"pwd\")"
     "- Every time when user asks to Test folder creation, it should create folder in current directory: (test-research-folders)"
-    "- When user asks to research, investigate, study, analyze, or build ML model:"
-    "  ALWAYS first call (load-skill \"research-workflow\") then follow the loaded instructions."
-    "- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
-    "- Mark step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
-    "- Pause for user: (research-checkpoint slug_in_quotes message_in_quotes)"
+    "- Every time user asks to start research task, investigate, study, analyze, or build ML model load research-workflow skill :(load-skill \"research-workflow\")"
+    "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
+    "- Pause for user approval: (research-checkpoint slug_in_quotes message_in_quotes)"
     "- Finish research and unload workflow: (research-complete slug_in_quotes)"
     "- Recall plan: (query \"research plan slug\")"))
 
@@ -73,23 +71,24 @@
 
 
 ;; ============ WORKFLOW LOADER ============
-
+( = (skillsDir) "./repos/OmegaClaw-Core/skills")
 (= (load-skill $name)
-   (let $path (py-str ("skills/" $name "/SKILL.md"))
+   (let $path (py-str ((skillsDir) "/" $name "/SKILL.md"))
         (let $content (catch (read-file $path))
-             (if (== $content (Error $_ $_))
-                 (send (py-str ("ERROR: skill file not found: " $path)))
-                 (progn (change-state! &active-skill $content)
-                        (remember (py-str ("WORKFLOW [" $name "] loaded")))
-                        (pin (py-str ("ACTIVE_WORKFLOW: " $name
-                                      " STATUS: starting"
-                                      " NEXT: follow workflow instructions")))
-                        (send (py-str ("Loaded workflow: " $name
-                                       ". Instructions active in context until completion.")))
-                        $content)))))
+             (case $content
+                 (((Error $a $b)
+                   (send (py-str ("ERROR: skill file not found: " $path))))
+                  ($else
+                   (progn (change-state! &active_skill $content)
+                          (pin (py-str ("ACTIVE_WORKFLOW: " $name
+                                        " STATUS: starting"
+                                        " NEXT: follow workflow instructions")))
+                          (send (py-str ("Loaded workflow: " $name
+                                        ". Instructions active in context until completion.")))
+                          (py-str ("Skill loaded: " $name)))))))))
 
 (= (unload-skill)
-   (progn (change-state! &active-skill "")
+   (progn (change-state! &active_skill "")
           (pin "No active workflow.")
           (send "Workflow unloaded from context.")
           "Skill unloaded"))
@@ -149,7 +148,7 @@
 
 ;; Unload research skill
 (= (research-complete $slug)
-   (progn (change-state! &active-skill "")
+   (progn (change-state! &active_skill "")
           (send (py-str ("Research complete: " $slug
                          "\nResults in " (researchDir) "/" $slug "/"
                          "\nWorkflow unloaded from context.")))

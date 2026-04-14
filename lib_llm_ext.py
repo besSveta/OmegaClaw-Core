@@ -13,7 +13,7 @@ ASI_CLIENT = _init_openai_client(
 
 ANTHROPIC_CLIENT = _init_openai_client(
     var_name="ANTHROPIC_API_KEY",
-    base_url="https://api.anthropic.com/v1/"
+    base_url="https://openrouter.ai/api/v1"
 )
 
 def _clean(text):
@@ -37,7 +37,7 @@ def useMiniMax(content):
 def useClaude(content):
     return _chat(
         client=ANTHROPIC_CLIENT,
-        model="claude-opus-4-6",
+        model="anthropic/claude-opus-4-6",
         content=content
     )
 
