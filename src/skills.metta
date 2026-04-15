@@ -31,6 +31,7 @@
     "- Every time when user asks to show current folder respond with result of next function: (shell \"pwd\")"
     "- Every time when user asks to Test folder creation, it should create folder in current directory: (test-research-folders)"
     "- Every time user asks to start research task, investigate, study, analyze, or build ML model load research-workflow skill :(load-skill \"research-workflow\")"
+    "- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
     "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
     "- Pause for user approval: (research-checkpoint slug_in_quotes message_in_quotes)"
     "- Finish research and unload workflow: (research-complete slug_in_quotes)"
