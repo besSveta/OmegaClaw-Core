@@ -127,7 +127,7 @@
 ;; update current step
 (= (research-step $slug $step $result $next)
    (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step " — " $result)))
-          (send (py-str ("[" $slug "] " $step ": " $result)))
+          (send (py-str ("[" $slug "] done: " $step)))
           (pin (py-str ("RESEARCH_ACTIVE: " $slug
                         " DONE: " $step
                         " RESULT: " $result
@@ -143,7 +143,6 @@
                         " RESUME: call (query \"research plan " $slug "\") when user responds")))
           (send (py-str ("CHECKPOINT [" $slug "]\n" $message "\n"
                          "Reply to continue.")))
-          (remember (py-str ("RESEARCH [" $slug "] checkpoint: " $message)))
           "Waiting for user"))
 
 ;; Unload research skill
