@@ -23,6 +23,10 @@
     "           ((--> (× tiger elephant) eat) (stv 1.0 0.9))))"
     "Also: note the $1 for independent variables, and for negated knowledge use (stv 0.0 0.9)"
     "Additionally |- also works for revision, to merge evidence even when the term of both premises is the same."
+    "You can also use PLN:"
+    "(metta (|~ ((Implication (Inheritance $1 (IntSet Feathered))"
+    "            (Inheritance $1 Bird)) (stv 1.0 0.9))"
+    "           ((Inheritance Pingu (IntSet Feathered)) (stv 1.0 0.9))))"))
     ;WORKFLOW:
     "- Load a workflow skill into active context: (load-skill skillname_in_quotes)"
     "  Available workflows: research-workflow"
@@ -47,7 +51,7 @@
    (progn (translatePredicate (open $file write $Out))
           (translatePredicate (write $Out $str))
           (translatePredicate (close $Out))
-          True))
+           WRITE-FILE-SUCCESS))
 
 (= (append-file $file $str)
    (progn (translatePredicate (exists_file $file))
@@ -55,7 +59,7 @@
           (translatePredicate (write $Out $str))
           (translatePredicate (nl $Out)),
           (translatePredicate (close $Out))
-          True))
+           APPEND-FILE-SUCCESS))
 
 (= (tavily-search $query)
    (py-call (agentverse.tavily_search $query)))
@@ -67,9 +71,10 @@
 
 (= (metta $str)
    (let $code (sread $str)
-        (eval $code)))
+        (repr (swrite (eval $code)))))
 
-
+(= (pin $x)
+   PIN-SUCCESS)
 
 ;; ============ WORKFLOW LOADER ============
 ( = (skillsDir) "./repos/OmegaClaw-Core/skills")
