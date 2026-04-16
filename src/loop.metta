@@ -41,6 +41,15 @@
                                           (change-state! &error $new)))
                  ($else $sexpr))))
 
+(= (truncate-large-args $sexpr)
+   (collapse (let $s (superpose $sexpr)
+                  (case $s
+                     ( ((write-file $path $_)
+                         (write-file $path "...truncated..."))
+                       ((append-file $path $_)
+                         (append-file $path "...truncated..."))
+                       ($else $s))))))
+
 (= (omegaclaw)
    (omegaclaw 1))
 (= (omegaclaw $k)
@@ -76,7 +85,7 @@
                                        ($_ (println! (RESPONSE: $sexpr)))
                                        ($results (RESULTS: (collapse (let $s (superpose $sexpr) (COMMAND_RETURN: ($s (HandleError SINGLE_COMMAND_FORMAT_ERROR_NOTHING_WAS_DONE_PLEASE_FIX_AND_RETRY $s (catch (let $R (eval $s) (py-call (helper.normalize_string $R)))))))))))
                                        ($_ (println! $results)))
-                                      (progn (if (or $msgnew  (not (== $sexpr ()))) (addToHistory $msg $response $sexpr $msgnew) _)
+                                      (progn (if (or $msgnew  (not (== $sexpr ()))) (addToHistory $msg $response  (truncate-large-args $sexpr) $msgnew) _)
                                              (change-state! &lastresults (string-safe (repr $results)))))
                                 (if (> (get_time) (get-state &nextWakeAt))
                                     (change-state! &loops (+ 1 (maxWakeLoops))) _)))

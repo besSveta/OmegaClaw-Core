@@ -74,7 +74,7 @@
 ;; ============ WORKFLOW LOADER ============
 ( = (skillsDir) "./repos/OmegaClaw-Core/skills")
 (= (load-skill $name)
-   (let $path (py-str ((skillsDir) "/" $name "/SKILL.md"))
+   (let $path (py-str ((skillsDir) "/" $name "/SKILL_like_origin.md"))
         (let $content (catch (read-file $path))
              (case $content
                  (((Error $a $b)
@@ -127,7 +127,7 @@
 
 ;; update current step
 (= (research-step $slug $step $result $next)
-   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step " — " $result)))
+   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step )))
           (send (py-str ("[" $slug "] done: " $step)))
           (pin (py-str ("RESEARCH_ACTIVE: " $slug
                         " DONE: " $step
