@@ -26,7 +26,7 @@
     "You can also use PLN:"
     "(metta (|~ ((Implication (Inheritance $1 (IntSet Feathered))"
     "            (Inheritance $1 Bird)) (stv 1.0 0.9))"
-    "           ((Inheritance Pingu (IntSet Feathered)) (stv 1.0 0.9))))"))
+    "           ((Inheritance Pingu (IntSet Feathered)) (stv 1.0 0.9))))"
     ;WORKFLOW:
     "- Load a workflow skill into active context: (load-skill skillname_in_quotes)"
     "  Available workflows: research-workflow"
@@ -77,9 +77,9 @@
    PIN-SUCCESS)
 
 ;; ============ WORKFLOW LOADER ============
-( = (skillsDir) "./repos/OmegaClaw-Core/skills")
+(= (skillsDir) "./repos/OmegaClaw-Core/skills")
 (= (load-skill $name)
-   (let $path (py-str ((skillsDir) "/" $name "/SKILL_like_origin.md"))
+   (let $path (py-str ((skillsDir) "/" $name "/SKILL.md"))
         (let $content (catch (read-file $path))
              (case $content
                  (((Error $a $b)
@@ -132,7 +132,7 @@
 
 ;; update current step
 (= (research-step $slug $step $result $next)
-   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step )))
+   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step " — " $result)))
           (send (py-str ("[" $slug "] done: " $step)))
           (pin (py-str ("RESEARCH_ACTIVE: " $slug
                         " DONE: " $step

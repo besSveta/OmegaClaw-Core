@@ -46,14 +46,7 @@
                                           (change-state! &error $new)))
                  ($else $sexpr))))
 
-(= (truncate-large-args $sexpr)
-   (collapse (let $s (superpose $sexpr)
-                  (case $s
-                     ( ((write-file $path $_)
-                         (write-file $path "...truncated..."))
-                       ((append-file $path $_)
-                         (append-file $path "...truncated..."))
-                       ($else $s))))))
+
 
 (= (omegaclaw)
    (omegaclaw 1))
@@ -71,7 +64,7 @@
                              ($_ (if (and (> $k 1) $msgnew)
                                      (change-state! &loops (maxNewInputLoops)) _)))
                             (if (> (get-state &loops) 0)
-                                 (let* (($lastmessage (if $msgnew (HUMAN-MSG: $msg) (if (spamShield) " DO NOT RE-SEND OR SPAM!" "")))
+                                (let* (($lastmessage (if $msgnew (HUMAN-MSG: $msg) (if (spamShield) " DO NOT RE-SEND OR SPAM!" "")))
                                        ($_ (change-state! &nextWakeAt (+ (get_time) (wakeupInterval))))
                                        ($_ (println! $lastmessage))
                                        ($send (py-str ($prompt $lastmessage)))
@@ -89,7 +82,7 @@
                                        ($_ (println! (RESPONSE: $sexpr)))
                                        ($results (RESULTS: (collapse (let $s (superpose $sexpr) (COMMAND_RETURN: ($s (HandleError SINGLE_COMMAND_FORMAT_ERROR_NOTHING_WAS_DONE_PLEASE_FIX_AND_RETRY $s (catch (let $R (eval $s) (py-call (helper.normalize_string $R)))))))))))
                                        ($_ (println! $results)))
-                                      (progn (if (or $msgnew  (not (== $sexpr ()))) (addToHistory $msg $response  (truncate-large-args $sexpr) $msgnew) _)
+                                      (progn (if (or $msgnew  (not (== $sexpr ()))) (addToHistory $msg $response $sexpr $msgnew) _)
                                              (change-state! &lastresults (string-safe (repr $results)))))
                                 (if (> (get_time) (get-state &nextWakeAt))
                                     (change-state! &loops (+ 1 (maxWakeLoops))) _)))
