@@ -33,7 +33,6 @@
     "- Unload active workflow from context: (unload-skill)"
     ;RESEARCH:
     "- Every time when user asks to show current folder respond with result of next function: (shell \"pwd\")"
-    "- Every time when user asks to Test folder creation, it should create folder in current directory: (test-research-folders)"
     "- Every time user asks to start research task, investigate, study, analyze, or build ML model load research-workflow skill :(load-skill \"research-workflow\")"
     "- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
     "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
@@ -102,11 +101,6 @@
 ;=======================Research========================================
 (= (researchDir) "/workspace/research")
 
-
-;; проверка что модуль загружен
-(= (rrresearch)
-   "ssearch")
-
 ;; Тест создания папок
 (= (test-research-folders)
    (shell (py-str ("mkdir -p " (researchDir) "/rrresearch")))
@@ -132,7 +126,7 @@
 
 ;; update current step
 (= (research-step $slug $step $result $next)
-   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step " — " $result)))
+   (progn (appendToHistory ((get_time_as_string) (newline) (py-str ("RESEARCH [" $slug "] done: " $step " — " $result))  (newline)))
           (send (py-str ("[" $slug "] done: " $step)))
           (pin (py-str ("RESEARCH_ACTIVE: " $slug
                         " DONE: " $step
@@ -157,6 +151,6 @@
           (send (py-str ("Research complete: " $slug
                          "\nResults in " (researchDir) "/" $slug "/"
                          "\nWorkflow unloaded from context.")))
-          (remember (py-str ("RESEARCH [" $slug "] COMPLETED")))
+          (appendToHistory ((get_time_as_string) (newline) (py-str ("RESEARCH [" $slug "] COMPLETED")) (newline)))
           (pin "No active research. No active workflow.")
           "Research complete, workflow unloaded"))
