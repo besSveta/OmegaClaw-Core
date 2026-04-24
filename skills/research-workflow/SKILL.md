@@ -1,11 +1,11 @@
 ---
 name: research-workflow
-description: End-to-end research workflow for MettaClaw. Iterative planning,
+description: End-to-end research workflow for OmegaClaw. Iterative planning,
   data acquisition, experiments, and write-up. For tasks like building
   predictive models, comparing algorithms, analyzing data.
 ---
 
-# Research Workflow (MettaClaw)
+# Research Workflow (OmegaClaw)
 
 Follow this workflow when solving research tasks.
 Produce reproducible artifacts and an evolving write-up.
