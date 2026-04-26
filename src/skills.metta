@@ -28,7 +28,7 @@
     "           (Inheritance $1 Bird)) (stv 1.0 0.9))"
     "          ((Inheritance Pingu (IntSet Feathered)) (stv 1.0 0.9)))"
     ;WORKFLOW:
-    "- Load a workflow skill into active context: (load-skill skillname_in_quotes)"
+    "- Load an existing workflow skill into active context: (load-skill skillname_in_quotes)"
     "  Available workflows: research-workflow"
     "- Unload active workflow from context: (unload-skill)"
     ;RESEARCH:
@@ -39,7 +39,7 @@
     "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
     "- Pause for user approval: (research-checkpoint slug_in_quotes message_in_quotes)"
     "- Finish research and unload workflow: (research-complete slug_in_quotes)"
-    "- Recall plan: (query \"research plan slug\")"))
+    "- Load a generated file into active context: (load-gen-skill slug_in_quotes filename_in_quotes)"))
 
 
 (= (read-file $file)
@@ -99,6 +99,17 @@
           (send "Workflow unloaded from context.")
           "Skill unloaded"))
 
+(= (load-gen-skill $slug $filename)
+   (let $content (read-file (py-str ((researchDir) "/" $slug "/" $filename)))
+        (progn (change-state! &active-skill $content)
+               (appendToHistory  ((get_time_as_string) (newline) (py-str ("LOADED [" $slug "/" $filename "]")) (newline)) )
+               (pin (py-str ("ACTIVE: " $slug
+                             " FILE: " $filename
+                             " STATUS: executing"
+                             " NEXT: follow loaded instructions")))
+               (send (py-str ("Loaded " $filename " for " $slug ". Following instructions.")))
+               $content)))
+
 ;=======================Research========================================
 (= (researchDir) "/workspace/research")
 
@@ -132,7 +143,7 @@
 
 ;; update current step
 (= (research-step $slug $step $result $next)
-   (progn (remember (py-str ("RESEARCH [" $slug "] done: " $step " — " $result)))
+   (progn (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] done: " $step " — " $result)) (newline)) )
           (send (py-str ("[" $slug "] done: " $step)))
           (pin (py-str ("RESEARCH_ACTIVE: " $slug
                         " DONE: " $step
@@ -146,7 +157,7 @@
    (progn (pin (py-str ("RESEARCH_ACTIVE: " $slug
                         " STATUS: WAITING_FOR_USER"
                         " DO_NOT_PROCEED"
-                        " RESUME: call (query \"research plan " $slug "\") when user responds")))
+                        )))
           (send (py-str ("CHECKPOINT [" $slug "]\n" $message "\n"
                          "Reply to continue.")))
           "Waiting for user"))
@@ -157,6 +168,6 @@
           (send (py-str ("Research complete: " $slug
                          "\nResults in " (researchDir) "/" $slug "/"
                          "\nWorkflow unloaded from context.")))
-          (remember (py-str ("RESEARCH [" $slug "] COMPLETED")))
+          (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] COMPLETED")) (newline)) )
           (pin "No active research. No active workflow.")
           "Research complete, workflow unloaded"))
