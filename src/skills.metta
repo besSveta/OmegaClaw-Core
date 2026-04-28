@@ -101,7 +101,7 @@
 
 (= (load-gen-skill $slug $filename)
    (let $content (read-file (py-str ((researchDir) "/" $slug "/" $filename)))
-        (progn (change-state! &active-skill $content)
+        (progn (change-state! &active_skill $content)
                (appendToHistory  ((get_time_as_string) (newline) (py-str ("LOADED [" $slug "/" $filename "]")) (newline)) )
                (pin (py-str ("ACTIVE: " $slug
                              " FILE: " $filename
@@ -112,11 +112,6 @@
 
 ;=======================Research========================================
 (= (researchDir) "/workspace/research")
-
-
-;; проверка что модуль загружен
-(= (rrresearch)
-   "ssearch")
 
 ;; Тест создания папок
 (= (test-research-folders)

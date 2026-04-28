@@ -34,28 +34,27 @@ The `research-start` skill creates the base folders.
 - `(research-step "slug" "problem-defined" "question: X metric: Y"
                   "search online for related methods and data sources")`
 
-### Step 2 — Research and create full plan
+### Step 2 — Research and create plan
 - Search online for related methods and data sources:
   `(tavily-search "query")`
 - Save findings:
   `(write-file "/workspace/research/slug/01_theory.md" "content")`
 - `(research-step "slug" "theory-saved" "sources: X methods: Y"
-                  "write full 02_plan.md")`
-- Write the full execution plan using the Plan Template below:
-  `(write-file "/workspace/research/slug/02_plan.md" "content")`
-- `(remember "RESEARCH_PLAN [slug]: milestones A B C ...")`
-- `(research-step "slug" "plan-created" "milestones A B C"
-                  "present plan to user for approval")`
-
-### Step 3 — Plan approval
-- Present plan to user:
-  `(send "Plan ready. Review 02_plan.md. Approve or suggest changes.")`
+                  "create plan and present to user")`
+- Create the full execution plan using findings and the Plan Template below
+- Send plan to user for review:
+  `(send "PROPOSED PLAN:\n<full plan text>")`
 - `(research-checkpoint "slug" "Plan ready. Approve or suggest changes?")`
 - **WAIT. Do NOT advance until user responds.**
-- If user approves: `(load-gen-skill "slug" "02_plan.md")`
-- If user requests changes: update 02_plan.md, present again, wait again
-- If user approves: `(load-gen-skill "slug" "02_plan.md")`
----
+
+### Step 3 — Plan approval
+- If user approves:
+  `(write-file "/workspace/research/slug/02_plan.md" "approved plan text")`
+  `(research-step "slug" "plan-approved" "milestones A B C"
+                  "follow plan from Milestone A")`
+  `(load-gen-skill "slug" "02_plan.md")`
+- If user requests changes:
+  Revise plan, send again, wait again
 
 ## Plan Template
 
@@ -68,7 +67,6 @@ The plan must be self-contained — after loading it replaces this file.
 ## Operating Rules
 - Work autonomously. Make your own decisions on implementation details.
 - Use `pin` to track current step between iterations.
-- Use `(query "research plan slug")` if you lose track of the plan.
 - All file paths must be absolute: `/workspace/research/slug/...`
 - Write code via `write-file`, run via `shell`. Never output code in `send`.
 - Save seeds and versions in every script.
