@@ -13,12 +13,17 @@ ASI_CLIENT = _init_openai_client(
 
 ANTHROPIC_CLIENT = _init_openai_client(
     var_name="ANTHROPIC_API_KEY",
-    base_url="https://openrouter.ai/api/v1"
+    base_url="https://api.anthropic.com/v1/"
 )
 
 ASIONE_CLIENT = _init_openai_client(
     var_name="ASIONE_API_KEY",
     base_url="https://api.asi1.ai/v1"
+)
+
+OPENROUTER_CLIENT = _init_openai_client(
+    var_name="OPENROUTER_API_KEY",
+    base_url="https://openrouter.ai/api/v1"
 )
 
 def _clean(text):
@@ -33,7 +38,7 @@ def _chat(client, model, content, max_tokens=6000, **kwargs):
             max_tokens=max_tokens,
             extra_body={
                 "enable_thinking": True,
-                "thinking_budget": 6000 
+                "thinking_budget": 6000
             },
             **kwargs
         )
@@ -52,7 +57,7 @@ def useMiniMax(content):
 def useClaude(content):
     return _chat(
         client=ANTHROPIC_CLIENT,
-        model="anthropic/claude-opus-4-6",
+        model="claude-opus-4-6",
         content=content
     )
 
@@ -84,6 +89,13 @@ def useAsi1(content):
     resp = resp.replace("</arg_value>", " ").replace("</tool_call>", " ").replace("<arg_value>", " ").replace("<tool_call>", " ")
     return resp
 
+
+def useOpenRouter(content):
+    return _chat(
+        client=OPENROUTER_CLIENT,
+        model="anthropic/claude-opus-4-6",
+        content=content
+    )
 _embedding_model = None
 
 def initLocalEmbedding():
