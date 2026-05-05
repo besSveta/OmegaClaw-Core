@@ -148,7 +148,6 @@ def _choose_provider():
             ("ASICloud", "Local", "ASI_API_KEY"),
             ("ASIOne", "Local", "ASIONE_API_KEY"),
             ("OpenRouter", "Local", "OPENROUTER_API_KEY")]
-        ]
         provider, embeddingprovider, api_token_var = providers[provider_id]
         return provider, embeddingprovider, api_token_var
 
