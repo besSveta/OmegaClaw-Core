@@ -14,7 +14,7 @@
           (configure spamShield True)
           (configure sleepInterval 1) ;10
           (configure LLM gpt-5.4)
-          (configure provider Anthropic) ;Anthropic or OpenAI or ASICloud or ASIOne
+          (configure provider Anthropic) ;Anthropic or OpenAI or ASICloud or ASIOne or Test
           (configure maxOutputToken 6000)
           (configure reasoningMode medium)
           (configure wakeupInterval 600) ;600=10 minutes
@@ -22,17 +22,8 @@
           (change-state! &lastresults "")
           (change-state! &loops (maxNewInputLoops))))
 
-(= (getActiveSkillContext)
-   (let $skill (get-state &active_skill)
-        (if (== $skill "")
-            ""
-            (py-str (" ACTIVE_WORKFLOW_INSTRUCTIONS: " $skill
-                     " YOU MUST FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
-                     " AND YOU CALL (unload-skill) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION.")))))
-
 (= (getContext)
    (string-safe (py-str ("PROMPT: " (getPrompt) " SKILLS: " (getSkills)
-                         (getActiveSkillContext)
                          " OUTPUT_FORMAT: Up to 5 lines, do not wrap quotes around args, do not use variables:" (newline)
                          " toolName1 arg1" (newline)
                          " toolName2 arg2" (newline)
@@ -45,8 +36,6 @@
    (case $sexpr (((Error $a $b) (let $new (append (get-state &error) (($msg $cmd)))
                                           (change-state! &error $new)))
                  ($else $sexpr))))
-
-
 
 (= (omegaclaw)
    (omegaclaw 1))
@@ -71,13 +60,7 @@
                                        ($_ (println! (CHARS_SENT: (string_length $send) $send)))
                                        ($respi (if (== (provider) OpenAI)
                                                    (useGPT (LLM) (maxOutputToken) (reasoningMode) $send)
-                                                   (if (== (provider) Anthropic)
-                                                       (py-call (lib_llm_ext.useClaude $send))
-                                                       (if (== (provider) ASICloud)
-                                                           (py-call (lib_llm_ext.useMiniMax $send))
-                                                           (if (== (provider) OpenRouter)
-                                                                (py-call (lib_llm_ext.useOpenRouter $send))
-                                                                (py-call (lib_llm_ext.useAsi1 $send)))))))
+                                                   (py-call (lib_llm_ext.callProvider (provider) $send (maxOutputToken)))))
                                        ($resp (py-call (helper.balance_parentheses $respi)))
                                        ($response (if (== "(" (first_char $resp)) $resp (progn (println! $resp) (repr (REMEMBER:OUTPUT_NOTHING_ELSE_THAN: ((skill arg) ...))))))
                                        ($sexpr (catch (sread $response)))
@@ -91,4 +74,6 @@
                                 (if (> (get_time) (get-state &nextWakeAt))
                                     (change-state! &loops (+ 1 (maxWakeLoops))) _)))
                       (sleep (sleepInterval))
+                      (cut)
+                      (gc)
                       (omegaclaw (+ 1 $k))))))
