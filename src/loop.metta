@@ -22,8 +22,17 @@
           (change-state! &lastresults "")
           (change-state! &loops (maxNewInputLoops))))
 
+(= (getActiveInstructionsContext)
+   (let $skill (get-state &active_instructions)
+        (if (== $skill "")
+            ""
+            (py-str (" ACTIVE_WORKFLOW_INSTRUCTIONS: " $skill
+                     " YOU MUST FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
+                     " AND YOU CALL (unload-instructions) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION.")))))
+
 (= (getContext)
    (string-safe (py-str ("PROMPT: " (getPrompt) " SKILLS: " (getSkills)
+                         (getActiveInstructionsContext)
                          " OUTPUT_FORMAT: Up to 5 lines, do not wrap quotes around args, do not use variables:" (newline)
                          " toolName1 arg1" (newline)
                          " toolName2 arg2" (newline)

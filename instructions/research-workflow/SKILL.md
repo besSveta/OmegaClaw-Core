@@ -52,7 +52,7 @@ The `research-start` skill creates the base folders.
   `(write-file "/workspace/research/slug/02_plan.md" "approved plan text")`
   `(research-step "slug" "plan-approved" "milestones A B C"
                   "follow plan from Milestone A")`
-  `(load-gen-skill "slug" "02_plan.md")`
+  `(load-gen-instructions "slug" "02_plan.md")`
 - If user requests changes:
   Revise plan, send again, wait again
 

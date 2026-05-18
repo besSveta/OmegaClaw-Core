@@ -28,16 +28,16 @@
     "           (Inheritance $1 Bird)) (stv 1.0 0.9))"
     "          ((Inheritance Pingu (IntSet Feathered)) (stv 1.0 0.9)))"
     ;WORKFLOW:
-    "- Load an existing workflow skill into active context: (load-skill skillname_in_quotes)"
+    "- Load an existing workflow instructions into active context: (load-instructions workflow_name_in_quotes)"
     "  Available workflows: research-workflow"
-    "- Unload active workflow from context: (unload-skill)"
+    "- Unload active workflow from context: (unload-instructions)"
     ;RESEARCH:
-    "- Every time user asks to start research task, investigate, study, analyze, or build ML model load research-workflow skill :(load-skill \"research-workflow\")"
+    "- Every time user asks to start research task, investigate, study, analyze, or build ML model load research-workflow instructions :(load-instructions \"research-workflow\")"
     "- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
     "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
     "- Pause for user approval: (research-checkpoint slug_in_quotes message_in_quotes)"
     "- Finish research and unload workflow: (research-complete slug_in_quotes)"
-    "- Load a generated file into active context: (load-gen-skill slug_in_quotes filename_in_quotes)"))
+    "- Load a generated file into active context: (load-gen-instructions slug_in_quotes filename_in_quotes)"))
 
 
 (= (read-file $file)
@@ -75,31 +75,31 @@
    PIN-SUCCESS)
 
 ;; ============ WORKFLOW LOADER ============
-(= (skillsDir) "./repos/OmegaClaw-Core/skills")
-(= (load-skill $name)
-   (let $path (py-str ((skillsDir) "/" $name "/SKILL.md"))
+(= (instructionsDir) "./repos/OmegaClaw-Core/instructions")
+(= (load-instructions $name)
+   (let $path (py-str ((instructionsDir) "/" $name "/SKILL.md"))
         (let $content (catch (read-file $path))
              (case $content
                  (((Error $a $b)
                    (send (py-str ("ERROR: skill file not found: " $path))))
                   ($else
-                   (progn (change-state! &active_skill $content)
+                   (progn (change-state! &active_instructions $content)
                           (pin (py-str ("ACTIVE_WORKFLOW: " $name
                                         " STATUS: starting"
                                         " NEXT: follow workflow instructions")))
                           (send (py-str ("Loaded workflow: " $name
                                         ". Instructions active in context until completion.")))
-                          (py-str ("Skill loaded: " $name)))))))))
+                          (py-str ("Instructions loaded: " $name)))))))))
 
-(= (unload-skill)
-   (progn (change-state! &active_skill "")
+(= (unload-instructions)
+   (progn (change-state! &active_instructions "")
           (pin "No active workflow.")
           (send "Workflow unloaded from context.")
-          "Skill unloaded"))
+          "Instructions unloaded"))
 
-(= (load-gen-skill $slug $filename)
+(= (load-gen-instructions $slug $filename)
    (let $content (read-file (py-str ((researchDir) "/" $slug "/" $filename)))
-        (progn (change-state! &active_skill $content)
+        (progn (change-state! &active_instructions $content)
                (appendToHistory  ((get_time_as_string) (newline) (py-str ("LOADED [" $slug "/" $filename "]")) (newline)) )
                (pin (py-str ("ACTIVE: " $slug
                              " FILE: " $filename
@@ -153,7 +153,7 @@
 
 ;; Unload research skill
 (= (research-complete $slug)
-   (progn (change-state! &active_skill "")
+   (progn (change-state! &active_instructions "")
           (send (py-str ("Research complete: " $slug
                          "\nResults in " (researchDir) "/" $slug "/"
                          "\nWorkflow unloaded from context.")))
