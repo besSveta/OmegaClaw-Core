@@ -129,5 +129,11 @@ def test_balance_parenthesis():
 	assert balance_parentheses('write-file test.txt "hello world"') == '((write-file "test.txt" "hello world"))'
 	assert balance_parentheses('send test.xt hello world') == '((send "test.xt hello world"))'
 
+
+def validate_slug(slug) :
+    if re.fullmatch(r'[a-zA-Z0-9_-]+', slug):
+        return "valid"
+    return "invalid"
+
 if __name__ == "__main__":
     test_balance_parenthesis()

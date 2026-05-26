@@ -75,7 +75,15 @@
    PIN-SUCCESS)
 
 ;; ============ WORKFLOW LOADER ============
-(= (instructionsDir) "./repos/OmegaClaw-Core/instructions")
+
+(= (get-existing-dir $paths)
+    (let $dir $paths
+       (if (exists-directory $dir)
+           $dir
+           (empty)))
+)
+
+(= (instructionsDir) (get-existing-dir (library instructions)))
 (= (load-instructions $name)
    (let $path (py-str ((instructionsDir) "/" $name "/SKILL.md"))
         (let $content (catch (read-file $path))
@@ -94,8 +102,7 @@
 (= (unload-instructions)
    (progn (change-state! &active_instructions "")
           (pin "No active workflow.")
-          (send "Workflow unloaded from context.")
-          "Instructions unloaded"))
+          ))
 
 (= (load-gen-instructions $slug $filename)
    (let $content (read-file (py-str ((researchDir) "/" $slug "/" $filename)))
@@ -109,54 +116,75 @@
                $content)))
 
 ;=======================Research========================================
-(= (researchDir) "/workspace/research")
+(= (researchDir)
+   (let $dir (get-existing-dir (library memory/skills_workspace))
+   (py-str ($dir "/research"))))
 
+(= (valid-slug $slug)
+   (if  (== (py-str ("valid")) (py-call (helper.validate_slug (py-str ($slug))))) True False)
+ )
 
 ;; LLM decides to start research
 ;; creates folders for research and asks to create 00_problem.md then search online
 (= (research-start $slug $topic)
-   (progn (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/src")))
-          (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/data")))
-          (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/runs")))
-          (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/figures")))
-          (write-file (py-str ((researchDir) "/" $slug "/topic.txt")) $topic)
-          (send (py-str ("Created project: " (researchDir) "/" $slug "\n"
-                         "Folders: src/ data/ runs/ figures/")))
-          (pin (py-str ("RESEARCH_ACTIVE: " $slug
-                        " DIR: " (researchDir) "/" $slug
-                        " TOPIC: " $topic
-                        " STEP: 1-problem"
-                        " ACTION_REQUIRED: Write 00_problem.md then search online"
-                        " for related methods and data sources.")))
-          $slug))
+    (if (valid-slug $slug)
+       (progn (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/src")))
+              (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/data")))
+              (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/runs")))
+              (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/figures")))
+              (write-file (py-str ((researchDir) "/" $slug "/topic.txt")) $topic)
+              (send (py-str ("Created project: " (researchDir) "/" $slug "\n"
+                             "Folders: src/ data/ runs/ figures/")))
+              (pin (py-str ("RESEARCH_ACTIVE: " $slug
+                            " DIR: " (researchDir) "/" $slug
+                            " TOPIC: " $topic
+                            " STEP: 1-problem"
+                            " ACTION_REQUIRED: Write 00_problem.md then search online"
+                            " for related methods and data sources.")))
+              $slug)
+        (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
+       )
+)
 
 ;; update current step
 (= (research-step $slug $step $result $next)
-   (progn (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] done: " $step " — " $result)) (newline)) )
-          (send (py-str ("[" $slug "] done: " $step)))
-          (pin (py-str ("RESEARCH_ACTIVE: " $slug
-                        " DONE: " $step
-                        " RESULT: " $result
-                        " NEXT: " $next)))
-          (py-str ("Done: " $step))))
+    (if (valid-slug $slug)
+       (progn (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] done: " $step " — " $result)) (newline)) )
+              (send (py-str ("[" $slug "] done: " $step)))
+              (pin (py-str ("RESEARCH_ACTIVE: " $slug
+                            " DONE: " $step
+                            " RESULT: " $result
+                            " NEXT: " $next)))
+              (py-str ("Done: " $step)))
+        (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
+     )
+)
 
 
 ;; Checkpoint: wait user's response
 (= (research-checkpoint $slug $message)
-   (progn (pin (py-str ("RESEARCH_ACTIVE: " $slug
-                        " STATUS: WAITING_FOR_USER"
-                        " DO_NOT_PROCEED"
-                        )))
-          (send (py-str ("CHECKPOINT [" $slug "]\n" $message "\n"
-                         "Reply to continue.")))
-          "Waiting for user"))
+    (if (valid-slug $slug)
+        (progn (pin (py-str ("RESEARCH_ACTIVE: " $slug
+                            " STATUS: WAITING_FOR_USER"
+                            " DO_NOT_PROCEED"
+                            )))
+              (send (py-str ("CHECKPOINT [" $slug "]\n" $message "\n"
+                             "Reply to continue.")))
+              "Waiting for user")
+        (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
+     )
+)
 
 ;; Unload research skill
 (= (research-complete $slug)
-   (progn (change-state! &active_instructions "")
-          (send (py-str ("Research complete: " $slug
-                         "\nResults in " (researchDir) "/" $slug "/"
-                         "\nWorkflow unloaded from context.")))
-          (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] COMPLETED")) (newline)) )
-          (pin "No active research. No active workflow.")
-          "Research complete, workflow unloaded"))
+    (if (valid-slug $slug)
+        (progn (change-state! &active_instructions "")
+              (send (py-str ("Research complete: " $slug
+                             "\nResults in " (researchDir) "/" $slug "/"
+                             "\nWorkflow unloaded from context.")))
+              (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] COMPLETED")) (newline)) )
+              (pin "No active research. No active workflow.")
+              "Research complete, workflow unloaded")
+         (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
+      )
+)

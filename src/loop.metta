@@ -20,6 +20,7 @@
           (configure wakeupInterval 600) ;600=10 minutes
           (change-state! &prevmsg "")
           (change-state! &lastresults "")
+          (change-state! &active_instructions "")
           (change-state! &loops (maxNewInputLoops))))
 
 (= (getActiveInstructionsContext)

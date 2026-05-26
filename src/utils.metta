@@ -16,6 +16,10 @@
    (progn (translatePredicate (exists_file $file))
           True))
 
+(= (exists-directory $path)
+   (progn (translatePredicate (exists_directory $path))
+          True))
+
 (= (string-replace $str $a $b)
    (atomic_list_concat (split_string $str $a "") $b))
 
