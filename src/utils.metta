@@ -17,8 +17,13 @@
           True))
 
 (= (exists-directory $path)
-   (progn (translatePredicate (exists_directory $path))
-          True))
+   (progn (translatePredicate (safe_exists_directory $path $r))
+          $r))
+
+(= (safe-exists-file $path)
+   (progn (translatePredicate (safe_exists_file $path $r))
+          $r))
+
 
 (= (string-replace $str $a $b)
    (atomic_list_concat (split_string $str $a "") $b))
@@ -70,3 +75,33 @@
         (if (== $res ())
             $default
             (car-atom $res))))
+
+( = (directory-files $dir)
+   (progn (translatePredicate (directory_files $dir $files))
+          $files)
+)
+
+( = (directory-dirs $dir)
+  (let $f (directory-files $dir)
+       (filter-dirs  $f $dir)
+   )
+)
+
+
+(= (filter-dirs $files $dir)
+   (if (== $files ())
+       ()
+       (progn (translatePredicate (atom_string (car-atom $files) $first))
+               (let* (
+                      ($tail     (cdr-atom $files))
+                      ($fullpath (py-str ($dir "/" $first)))
+                      ($rest     (filter-dirs $tail $dir)))
+                         (if (or (== $first ".") (== $first ".."))
+                             $rest
+                             (if (exists-directory $fullpath)
+                                 (cons-atom $fullpath $rest)
+                                 $rest))
+                 )
+        )
+    )
+)

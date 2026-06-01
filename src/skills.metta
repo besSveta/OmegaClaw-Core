@@ -29,15 +29,8 @@
     "          ((Inheritance Pingu (IntSet Feathered)) (stv 1.0 0.9)))"
     ;WORKFLOW:
     "- Load an existing workflow instructions into active context: (load-instructions workflow_name_in_quotes)"
-    "  Available workflows: research-workflow"
-    "- Unload active workflow from context: (unload-instructions)"
-    ;RESEARCH:
-    "- Every time user asks to start research task, investigate, study, analyze, or build ML model load research-workflow instructions :(load-instructions \"research-workflow\")"
-    "- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
-    "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
-    "- Pause for user approval: (research-checkpoint slug_in_quotes message_in_quotes)"
-    "- Finish research and unload workflow: (research-complete slug_in_quotes)"
-    "- Load a generated file into active context: (load-gen-instructions slug_in_quotes filename_in_quotes)"))
+    "  Available workflows: " (workflows-with-description)
+    "- Unload active workflow from context: (unload-instructions)"))
 
 
 (= (read-file $file)
@@ -103,9 +96,11 @@
    (progn (change-state! &active_instructions "")
           (pin "No active workflow.")
           ))
-
-(= (load-gen-instructions $slug $filename)
-   (let $content (read-file (py-str ((researchDir) "/" $slug "/" $filename)))
+(= (valid-slug $slug)
+   (if  (== (py-str ("valid")) (py-call (helper.validate_slug (py-str ($slug))))) True False)
+ )
+(= (load-gen-instructions $project_dir $slug $filename)
+   (let $content (read-file (py-str ($project_dir "/" $slug "/" $filename)))
         (progn (change-state! &active_instructions $content)
                (appendToHistory  ((get_time_as_string) (newline) (py-str ("LOADED [" $slug "/" $filename "]")) (newline)) )
                (pin (py-str ("ACTIVE: " $slug
@@ -115,76 +110,21 @@
                (send (py-str ("Loaded " $filename " for " $slug ". Following instructions.")))
                $content)))
 
-;=======================Research========================================
-(= (researchDir)
-   (let $dir (get-existing-dir (library memory/skills_workspace))
-   (py-str ($dir "/research"))))
+;;========================== Functions to load workflow description =======================
+;; returns workflow name and its description
+(= (workflows-with-description)
+   (let*  ( ($base (instructionsDir))
+            ($dirs (directory-dirs $base)))
+        (collect-description $dirs )))
 
-(= (valid-slug $slug)
-   (if  (== (py-str ("valid")) (py-call (helper.validate_slug (py-str ($slug))))) True False)
- )
-
-;; LLM decides to start research
-;; creates folders for research and asks to create 00_problem.md then search online
-(= (research-start $slug $topic)
-    (if (valid-slug $slug)
-       (progn (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/src")))
-              (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/data")))
-              (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/runs")))
-              (shell (py-str ("mkdir -p " (researchDir) "/" $slug "/figures")))
-              (write-file (py-str ((researchDir) "/" $slug "/topic.txt")) $topic)
-              (send (py-str ("Created project: " (researchDir) "/" $slug "\n"
-                             "Folders: src/ data/ runs/ figures/")))
-              (pin (py-str ("RESEARCH_ACTIVE: " $slug
-                            " DIR: " (researchDir) "/" $slug
-                            " TOPIC: " $topic
-                            " STEP: 1-problem"
-                            " ACTION_REQUIRED: Write 00_problem.md then search online"
-                            " for related methods and data sources.")))
-              $slug)
-        (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
-       )
-)
-
-;; update current step
-(= (research-step $slug $step $result $next)
-    (if (valid-slug $slug)
-       (progn (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] done: " $step " — " $result)) (newline)) )
-              (send (py-str ("[" $slug "] done: " $step)))
-              (pin (py-str ("RESEARCH_ACTIVE: " $slug
-                            " DONE: " $step
-                            " RESULT: " $result
-                            " NEXT: " $next)))
-              (py-str ("Done: " $step)))
-        (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
-     )
-)
-
-
-;; Checkpoint: wait user's response
-(= (research-checkpoint $slug $message)
-    (if (valid-slug $slug)
-        (progn (pin (py-str ("RESEARCH_ACTIVE: " $slug
-                            " STATUS: WAITING_FOR_USER"
-                            " DO_NOT_PROCEED"
-                            )))
-              (send (py-str ("CHECKPOINT [" $slug "]\n" $message "\n"
-                             "Reply to continue.")))
-              "Waiting for user")
-        (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
-     )
-)
-
-;; Unload research skill
-(= (research-complete $slug)
-    (if (valid-slug $slug)
-        (progn (change-state! &active_instructions "")
-              (send (py-str ("Research complete: " $slug
-                             "\nResults in " (researchDir) "/" $slug "/"
-                             "\nWorkflow unloaded from context.")))
-              (appendToHistory  ((get_time_as_string) (newline) (py-str  ("RESEARCH [" $slug "] COMPLETED")) (newline)) )
-              (pin "No active research. No active workflow.")
-              "Research complete, workflow unloaded")
-         (send (py-str ("Invalid slug: " $slug ". Only a-z, 0-9, - and _ allowed.")))
-      )
-)
+;; collects workflow description from description.txt
+(= (collect-description $dirs )
+   (if (== $dirs () )
+       ()
+       (let*  (($tail  (cdr-atom $dirs))
+              ($first (car-atom $dirs))
+              ($path  (py-str ($first "/description.txt")))
+              ($rest (collect-description $tail)))
+         (if (safe-exists-file $path)
+             (cons-atom (read-file $path) $rest)
+            $rest))))
