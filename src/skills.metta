@@ -76,39 +76,49 @@
            (empty)))
 )
 
-(= (instructionsDir) (get-existing-dir (library instructions)))
-(= (load-instructions $name)
-   (let $path (py-str ((instructionsDir) "/" $name "/SKILL.md"))
-        (let $content (catch (read-file $path))
-             (case $content
-                 (((Error $a $b)
-                   (send (py-str ("ERROR: skill file not found: " $path))))
-                  ($else
-                   (progn (change-state! &active_instructions $content)
-                          (pin (py-str ("ACTIVE_WORKFLOW: " $name
-                                        " STATUS: starting"
-                                        " NEXT: follow workflow instructions")))
-                          (send (py-str ("Loaded workflow: " $name
-                                        ". Instructions active in context until completion.")))
-                          (py-str ("Instructions loaded: " $name)))))))))
 
-(= (unload-instructions)
-   (progn (change-state! &active_instructions "")
-          (pin "No active workflow.")
-          ))
 (= (valid-slug $slug)
    (if  (== (py-str ("valid")) (py-call (helper.validate_slug (py-str ($slug))))) True False)
  )
-(= (load-gen-instructions $project_dir $slug $filename)
-   (let $content (read-file (py-str ($project_dir "/" $slug "/" $filename)))
-        (progn (change-state! &active_instructions $content)
-               (appendToHistory  ((get_time_as_string) (newline) (py-str ("LOADED [" $slug "/" $filename "]")) (newline)) )
-               (pin (py-str ("ACTIVE: " $slug
-                             " FILE: " $filename
-                             " STATUS: executing"
-                             " NEXT: follow loaded instructions")))
-               (send (py-str ("Loaded " $filename " for " $slug ". Following instructions.")))
-               $content)))
+
+(= (instructionsDir) (get-existing-dir (library instructions)))
+(= (load-instructions $name)
+   (if (not (valid-slug $name))
+       (send (py-str ("ERROR: invalid workflow name: " $name)))
+       (let $path (py-str ((instructionsDir) "/" $name "/SKILL.md"))
+            (if (not (exists-file $path))
+                (send (py-str ("ERROR: skill file not found: " $path)))
+                (let $content (read-file $path)
+                     (progn
+                       (change-state! &active_instructions $content)
+                       (pin (py-str ("ACTIVE_WORKFLOW: " $name
+                                     " STATUS: starting"
+                                     " NEXT: follow workflow instructions")))
+                       (send (py-str ("Loaded workflow: " $name
+                                     ". Instructions active in context until completion.")))
+                       (py-str ("Instructions loaded: " $name))))))))
+
+(= (unload-instructions)
+   (progn (change-state! &active_instructions "")
+          (unload-workflow-skills)
+          (pin "No active workflow. Workflow skills cleared.")
+          ))
+
+;; Validate filename
+(= (valid-filename $filename)
+   (if (== (py-str ("valid")) (py-call (helper.validate_filename (py-str ($filename)))))
+       True
+       False))
+
+
+; to load skills descriptions which are defined only  for current workflow
+(= (add-workflow-skills $skills)
+   (progn (change-state! &workflow_skills $skills)
+          (pin (py-str ("Workflow skills loaded: " $skills)))))
+
+; to load skills descriptions
+(= (unload-workflow-skills)
+   (change-state! &workflow_skills ""))
 
 ;;========================== Functions to load workflow description =======================
 ;; returns workflow name and its description

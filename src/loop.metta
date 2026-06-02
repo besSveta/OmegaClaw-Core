@@ -31,6 +31,13 @@
                      " YOU MUST FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
                      " AND YOU CALL (unload-instructions) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION.")))))
 
+ (= (getWorkflowSkillsContext)
+   (let $skills (get-state &workflow_skills)
+        (if (== $skills "")
+            ""
+            (py-str (" AVAILABLE_WORKFLOW_SKILLS: " $skills
+                     " YOU SHOULD CALL THESE SKILLS ACCORDING TO INSTRUCTIONS IN WORKFLOW.")))))
+
 (= (getContext)
    (string-safe (py-str ("PROMPT: " (getPrompt) " SKILLS: " (getSkills)
                          (getActiveInstructionsContext)

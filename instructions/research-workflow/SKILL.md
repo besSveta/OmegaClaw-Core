@@ -10,6 +10,16 @@ This workflow guides you through problem definition, online research,
 and creating a detailed execution plan. Once the user approves the plan,
 it replaces these instructions and you follow it step by step.
 
+## Load Workflow specific skills description
+call 
+```
+  (add-workflow-skills (py-str  ("- Create research project folders: (research-start slug_in_quotes topic_in_quotes)"
+    "- Mark research step done: (research-step slug_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)"
+    "- Pause for user approval: (research-checkpoint slug_in_quotes message_in_quotes)"
+    "- Finish research and unload workflow: (research-complete slug_in_quotes)"
+    "- Load a generated file into active context: (load-gen-instructions slug_in_quotes filename_in_quotes)")))
+```
+
 ## Project Structure
 
 All projects live under `/workspace/research/<slug>/`.
@@ -52,7 +62,7 @@ The `research-start` skill creates the base folders.
   `(write-file "/workspace/research/slug/02_plan.md" "approved plan text")`
   `(research-step "slug" "plan-approved" "milestones A B C"
                   "follow plan from Milestone A")`
-  `(load-gen-instructions "slug" "02_plan.md")`
+  `(load-dynamic-instructions-safe (researchDir) "slug" "02_plan.md")` - where `(researchDir)` - gets the directory where files for current research are located
 - If user requests changes:
   Revise plan, send again, wait again
 
