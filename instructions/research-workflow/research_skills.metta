@@ -2,7 +2,7 @@
 (= (safe-instruction-path $project_dir $slug $filename)
    (py-call (helper.safe_path (py-str ($project_dir)) (py-str ($slug)) (py-str ($filename)))))
 
-
+; loads instructions created during workflow
 (= (load-dynamic-instructions $project_dir $slug $filename)
    (if (not (valid-slug $slug))
        (send (py-str ("ERROR: invalid slug: " $slug)))
@@ -11,9 +11,9 @@
            (let $path (safe-instruction-path $project_dir $slug $filename)
                 (if (== $path "")
                     (send (py-str ("ERROR: path traversal rejected for " $slug "/" $filename)))
-                    (load-gen-instructions-safe $path $slug $filename))))))
+                    (load-dynamic-instructions-safe $path $slug $filename))))))
 
-; actually load the file. Only called after validation.
+; actually loads the file (internal). Only called after validation.
 (= (load-dynamic-instructions-safe $path $slug $filename)
    (if (not (exists-file $path))
        (send (py-str ("ERROR: file not found: " $path)))

@@ -99,7 +99,7 @@
                          (if (or (== $first ".") (== $first ".."))
                              $rest
                              (if (exists-directory $fullpath)
-                                 (cons-atom $fullpath $rest)
+                                 (cons-atom $first $rest)
                                  $rest))
                  )
         )
