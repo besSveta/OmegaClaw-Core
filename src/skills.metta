@@ -91,6 +91,7 @@
                 (let $content (read-file $path)
                      (progn
                        (change-state! &active_instructions $content)
+                       (add-workflow-skills $name)
                        (pin (py-str ("ACTIVE_WORKFLOW: " $name
                                      " STATUS: starting"
                                      " NEXT: follow workflow instructions")))
@@ -112,9 +113,14 @@
 
 
 ; to load skills descriptions which are defined only  for current workflow
-(= (add-workflow-skills $skills)
-   (progn (change-state! &workflow_skills $skills)
-          (pin (py-str ("Workflow skills loaded: " $skills)))))
+(= (add-workflow-skills $name)
+   (let $path (py-str ((instructionsDir) "/" $name "/workflow_skills_description.txt"))
+            (if (exists-file $path)
+                (let $content (read-file $path)
+                     (progn
+                       (change-state! &workflow_skills $content)
+                       (pin (py-str ("Workflow skills loaded: " $name)))))
+                       (change-state! &workflow_skills "") )))
 
 ; to load skills descriptions
 (= (unload-workflow-skills)

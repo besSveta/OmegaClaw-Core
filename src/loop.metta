@@ -21,6 +21,7 @@
           (change-state! &prevmsg "")
           (change-state! &lastresults "")
           (change-state! &active_instructions "")
+          (change-state! &workflow_skills "")
           (change-state! &loops (maxNewInputLoops))))
 
 (= (getActiveInstructionsContext)
@@ -40,6 +41,7 @@
 
 (= (getContext)
    (string-safe (py-str ("PROMPT: " (getPrompt) " SKILLS: " (getSkills)
+                         (getWorkflowSkillsContext)
                          (getActiveInstructionsContext)
                          " OUTPUT_FORMAT: Up to 5 lines, do not wrap quotes around args, do not use variables:" (newline)
                          " toolName1 arg1" (newline)
