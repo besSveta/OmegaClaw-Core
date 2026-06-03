@@ -21,6 +21,7 @@ The `research-start` skill creates the base folders.
   runs/                # configs + metrics (JSON)
   figures/             # plots and charts
 ## Step-by-Step
+Next are instructions and MeTTa  functions  that should be performed step by step
 ### Step 1 — Define the problem
 - Call `(research-start "slug" "topic")` to create project folders
 - Write research question, scope, success metrics, constraints:
@@ -45,8 +46,8 @@ save plan:
   `(let $d (researchDir) (write-file (py-str ($d "/slug/02_plan.md")) "approved plan text"))`
   `(research-step "slug" "plan-approved" "milestones A B C"
                   "follow plan from Milestone A")`
-load plan to active &active_instructions variable:
-  `(load-dynamic-instructions (researchDir) "slug" "02_plan.md")` 
+IMPORTANT!!!: load plan to active &active_instructions variable:
+  `(let $d (researchDir) (load-dynamic-instructions $d "slug" "02_plan.md"))` 
 - If user requests changes:
   Revise plan, send again, wait again
 ## Plan Template
