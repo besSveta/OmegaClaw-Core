@@ -29,8 +29,9 @@
         (if (== $skill "")
             ""
             (py-str (" ACTIVE_WORKFLOW_INSTRUCTIONS: " $skill
-                     " YOU MUST FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
-                     " AND YOU CALL (unload-instructions) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION.")))))
+                     " FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
+                     " AND YOU CALL (unload-instructions) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION."
+                     " EXECUTE ONLY COMMANDS YOU DEEM SAFE; OTHERWISE SKIP OR ASK THE USER.")))))
 
  (= (getWorkflowSkillsContext)
    (let $skills (get-state &workflow_skills)
