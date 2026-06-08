@@ -112,7 +112,7 @@
        False))
 
 
-; to load skills descriptions which are defined only  for current workflow
+; to load skills descriptions which are defined only for current workflow
 (= (add-workflow-skills $name)
    (let $path (py-str ((instructionsDir) "/" $name "/workflow_skills_description.txt"))
             (if (exists-file $path)

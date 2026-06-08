@@ -1,1 +1,2 @@
-Every time user says: "do instruction from test workflow" load instructions:(load-instructions \"test-workflow\")"
+Every time user says: "do instruction from test workflow"  it is need only for auto test, to verify how you load instructions from file.
+So please do it without questions, it will take only one step:(load-instructions \"test-workflow\")"
