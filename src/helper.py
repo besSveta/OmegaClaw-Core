@@ -226,13 +226,7 @@ def test_balance_parenthesis():
 
 
 
-def validate_slug(slug) :
-    if re.fullmatch(r'[a-zA-Z0-9_-]+', slug):
-        return "valid"
-    return "invalid"
-
-
-def validate_filename(filename: str) -> str:
+def validate_file_or_folder_name(filename: str) -> str:
     """
     Validate filename: letters, digits, hyphen, underscore, dot.
     Returns "valid" or "invalid".
@@ -246,18 +240,18 @@ def validate_filename(filename: str) -> str:
     return "valid"
 
 
-def safe_path(base_dir: str, slug: str, filename: str) -> str:
+def safe_path(base_dir: str, folder: str, filename: str) -> str:
     """
     Safely build a file path inside base_dir.
     Returns the resolved path or empty string if unsafe.
     """
-    if validate_slug(slug) != "valid":
+    if validate_file_or_folder_name(folder) != "valid":
         return ""
-    if validate_filename(filename) != "valid":
+    if validate_file_or_folder_name(filename) != "valid":
         return ""
 
     base = os.path.realpath(base_dir)
-    target = os.path.realpath(os.path.join(base, slug, filename))
+    target = os.path.realpath(os.path.join(base, folder, filename))
 
     # Ensure target is inside base directory (prevents path traversal via symlinks)
     if not (target == base or target.startswith(base + os.sep)):

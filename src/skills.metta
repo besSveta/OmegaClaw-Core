@@ -75,15 +75,15 @@
            $dir
            (empty)))
 )
-
-
-(= (valid-slug $slug)
-   (if  (== (py-str ("valid")) (py-call (helper.validate_slug (py-str ($slug))))) True False)
- )
+;; Validate name
+(= (valid-file-or-folder-name $filename)
+   (if (== (py-str ("valid")) (py-call (helper.validate_file_or_folder_name(py-str ($filename)))))
+       True
+       False))
 
 (= (instructionsDir) (get-existing-dir (library instructions)))
 (= (load-instructions $name)
-   (if (not (valid-slug $name))
+   (if (not (valid-file-or-folder-name  $name))
        (send (py-str ("ERROR: invalid workflow name: " $name)))
        (let $path (py-str ((instructionsDir) "/" $name "/SKILL.md"))
             (if (not (exists-file $path))
@@ -105,11 +105,6 @@
           (pin "No active workflow. Workflow skills cleared.")
           ))
 
-;; Validate filename
-(= (valid-filename $filename)
-   (if (== (py-str ("valid")) (py-call (helper.validate_filename (py-str ($filename)))))
-       True
-       False))
 
 
 ; to load skills descriptions which are defined only for current workflow
