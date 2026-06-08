@@ -71,7 +71,7 @@
 
 (= (get-existing-dir $paths)
     (let $dir $paths
-       (if (exists-directory $dir)
+       (if (safe_exists_directory $dir)
            $dir
            (empty)))
 )
@@ -136,6 +136,6 @@
               ($first (car-atom $dirs))
               ($path  (py-str ($base "/" $first "/description.txt")))
               ($rest (collect-description $tail $base)))
-         (if (safe-exists-file $path)
+         (if (safe_exists_file $path)
              (cons-atom (py-str ($first ": " (read-file $path))) $rest)
             $rest))))

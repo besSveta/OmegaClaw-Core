@@ -16,14 +16,7 @@
    (progn (translatePredicate (exists_file $file))
           True))
 
-(= (exists-directory $path)
-   (progn (translatePredicate (safe_exists_directory $path $r))
-          $r))
-
-(= (safe-exists-file $path)
-   (progn (translatePredicate (safe_exists_file $path $r))
-          $r))
-
+!(import_prolog_functions_from_file (library OmegaClaw-Core ./src/utils.pl) (safe_exists_directory safe_exists_file))
 
 (= (string-replace $str $a $b)
    (atomic_list_concat (split_string $str $a "") $b))
@@ -98,7 +91,7 @@
                       ($rest     (filter-dirs $tail $dir)))
                          (if (or (== $first ".") (== $first ".."))
                              $rest
-                             (if (exists-directory $fullpath)
+                             (if (safe_exists_directory $fullpath)
                                  (cons-atom $first $rest)
                                  $rest))
                  )
