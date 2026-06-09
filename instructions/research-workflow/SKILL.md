@@ -47,7 +47,7 @@ save plan:
   `(research-step "research-name" "plan-approved" "milestones A B C"
                   "follow plan from Milestone A")`
 IMPORTANT!!!: load plan to active &active_instructions variable:
-  `(let $d (researchDir) (load-dynamic-instructions $d "research-name" "02_plan.md"))` 
+  `(load-research-dynamic-instructions "research-name" "02_plan.md")` 
 - If user requests changes:
   Revise plan, send again, wait again
 ## Plan Template

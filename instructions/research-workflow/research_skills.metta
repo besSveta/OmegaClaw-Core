@@ -2,6 +2,9 @@
 (= (safe-instruction-path $project_dir $research-name $filename)
    (py-call (helper.safe_path (py-str ($project_dir)) (py-str ($research-name)) (py-str ($filename)))))
 
+(= (load-research-dynamic-instructions  $research-name $filename)
+    (let $d (researchDir) (load-dynamic-instructions $d $research-name $filename)))
+
 ; loads instructions created during workflow
 (= (load-dynamic-instructions $project_dir $research-name $filename)
    (if (not (valid-file-or-folder-name $research-name))

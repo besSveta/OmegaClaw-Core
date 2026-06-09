@@ -2,5 +2,5 @@
 '- Mark research step done: (research-step researchname_in_quotes step_in_quotes result_in_quotes next_action_in_quotes)'
 '- Pause for user approval: (research-checkpoint researchname_in_quotes message_in_quotes)'
 '- Finish research and unload workflow: (research-complete researchname_in_quotes)'
-'- Load a generated file into active context: (load-gen-instructions researchname_in_quotes filename_in_quotes)'
+'- Load a generated file into active context: (load-research-dynamic-instructions researchname_in_quotes filename_in_quotes)'
 '- Get research directory: (researchDir)'
