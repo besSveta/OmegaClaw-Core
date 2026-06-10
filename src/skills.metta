@@ -115,7 +115,7 @@
                      (progn
                        (change-state! &workflow_skills $content)
                        (pin (py-str ("Workflow skills loaded: " $name)))))
-                       (change-state! &workflow_skills "") )))
+                (change-state! &workflow_skills ""))))
 
 ; to load skills descriptions
 (= (unload-workflow-skills)
