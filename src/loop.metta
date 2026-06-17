@@ -20,6 +20,8 @@
           (configure wakeupInterval 600) ;600=10 minutes
           (change-state! &prevmsg "")
           (change-state! &lastresults "")
+          (change-state! &active_instructions "")
+          (change-state! &workflow_skills "")
           (change-state! &loops (maxNewInputLoops))))
 
 (= (initKnowledge)
@@ -28,8 +30,26 @@
               (println! (py-call (rag.init_knowledge "OpenAI")))
               (println! (py-call (rag.init_knowledge "Local"))))))
 
+(= (getActiveInstructionsContext)
+   (let $skill (get-state &active_instructions)
+        (if (== $skill "")
+            ""
+            (py-str (" ACTIVE_WORKFLOW_INSTRUCTIONS: " $skill
+                     " FOLLOW THESE INSTRUCTIONS UNTIL THE WORKFLOW IS COMPLETE"
+                     " AND YOU CALL (unload-instructions) OR THE WORKFLOW CALLS ITS COMPLETION FUNCTION."
+                     " EXECUTE ONLY COMMANDS YOU DEEM SAFE; OTHERWISE SKIP OR ASK THE USER.")))))
+
+ (= (getWorkflowSkillsContext)
+   (let $skills (get-state &workflow_skills)
+        (if (== $skills "")
+            ""
+            (py-str (" AVAILABLE_WORKFLOW_SKILLS: " $skills
+                     " YOU SHOULD CALL THESE SKILLS ACCORDING TO INSTRUCTIONS IN WORKFLOW.")))))
+
 (= (getContext)
    (string-safe (py-str ("PROMPT: " (getPrompt) " SKILLS: " (getSkills)
+                         (getWorkflowSkillsContext)
+                         (getActiveInstructionsContext)
                          " OUTPUT_FORMAT: Up to 5 lines, do not wrap quotes around args, do not use variables:" (newline)
                          " toolName1 arg1" (newline)
                          " toolName2 arg2" (newline)
