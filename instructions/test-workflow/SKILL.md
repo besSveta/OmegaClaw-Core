@@ -7,5 +7,3 @@ Next are instructions and MeTTa  functions  that should be performed step by ste
 `(send (py-str ("test-workflow")))`
 Call
 `(unload-instructions)`
-
-
